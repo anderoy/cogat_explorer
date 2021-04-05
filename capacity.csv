@@ -1,13 +1,12 @@
-﻿School,0,1,2,3,4,5,6,7,8,Total
-AoA ,40 ,0 ,5 ,0 ,0 ,0 ,15 ,20 ,10 ,90 
-Bates Academy,75 ,12 ,10 ,12 ,15 ,15 ,15 ,12 ,10 ,176 
-Burton ,,,,,,,,,,
-C. Wright ,75 ,25 ,15 ,15 ,15 ,0 ,0 ,0 ,  ,145 
-Chrysler Elementary (Grades K-5),25 ,10 ,2 ,4 ,6 ,6 ,0 ,0 ,0 ,53 
-Clippert ,  ,  ,  ,  ,  ,  ,30 ,1 ,2 ,33 
-DIA ,30 ,20 ,20 ,15 ,18 ,10 ,12 ,8 ,21 ,154 
-Foreign Language Immersion and Cultural Studies School,100 ,30 ,15 ,15 ,15 ,0 ,0 ,0 ,,175 
-Golightly Education Center,5 ,8 ,8 ,10 ,8 ,8 ,8 ,8 ,8 ,71 
-Garvey ,8 ,10 ,10 ,10 ,0 ,8 ,10 ,2 ,0 ,58 
-Paul Robeson/Malcolm X Academy,,,,,,,,,,
-Total ,358 ,115 ,85 ,81 ,77 ,47 ,90 ,51 ,51 ,955 
+﻿School ID,School,0,1,2,3,4,5,6,7,8,Total
+3645,AoA ,40 ,0 ,5 ,0 ,0 ,0 ,15 ,20 ,10 ,90 
+2882,Bates Academy,75 ,12 ,10 ,12 ,15 ,15 ,15 ,12 ,10 ,176 
+468,Burton ,,,,,,,,,,
+9125,C. Wright ,75 ,25 ,15 ,15 ,15 ,0 ,0 ,0 ,  ,145 
+689,Chrysler Elementary (Grades K-5),25 ,10 ,2 ,4 ,6 ,6 ,0 ,0 ,0 ,53 
+7500,Clippert ,  ,  ,  ,  ,  ,  ,30 ,1 ,2 ,33 
+39,DIA ,30 ,20 ,20 ,15 ,18 ,10 ,12 ,8 ,21 ,154 
+7326,Foreign Language Immersion and Cultural Studies School,100 ,30 ,15 ,15 ,15 ,0 ,0 ,0 ,,175 
+176,Golightly Education Center,5 ,8 ,8 ,10 ,8 ,8 ,8 ,8 ,8 ,71 
+7581,Garvey ,8 ,10 ,10 ,10 ,0 ,8 ,10 ,2 ,0 ,58 
+7633,Paul Robeson/Malcolm X Academy,,,,,,,,,,

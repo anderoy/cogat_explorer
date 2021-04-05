@@ -18,6 +18,11 @@ cogat['Composite Grade Percentile'] = np.where(cogat['Class Grade'] < 3,
                                                cogat['Grade Percentile Rank (GPR) VQ'],
                                                cogat['Grade Percentile Rank (GPR) VQN'])
 cogat['Decision'] = 'Decline'
+cogat['School ID'] = np.where(cogat['top-choice school'] == 'Bates Academy', 2882,
+                     np.where(cogat['top-choice school'] == 'Foreign Language Immersion and Cultural Studies School', 7326,
+                     np.where(cogat['top-choice school'] == 'Chrysler Elementary (Grades K-5)', 689,
+                     np.where(cogat['top-choice school'] == 'Paul Robeson/Malcolm X Academy', 7633,
+                     np.where(cogat['top-choice school'] == 'Golightly Education Center', 176, 0)))))
 
 
 ############# Layout Area 
@@ -34,32 +39,49 @@ outputs = st.beta_container()
 
 ############# Sidebar Toggles
 
-if st.sidebar.checkbox('Show Overview'):
+if st.sidebar.checkbox('Show Overview', value=True):
   with overview:
     st.subheader('Overview')
-
     # Add info about how the groupings arew calculated from the test company
     # Note that these are "National Percentiles"
-    'The Stanine Performance Groups can help us get a quick understanding of how our applicants fared in comparison to all other test takers. The graphic on the lower left provides a quick overview of the Stanine groups.'
+    'All comparison scores that we look at (Percentiles, Stanine, Scale Scores, etc.) are compared to the National results from all students who completed the CogAT during the same testing window.'
+    'The Stanine Performance Groups can help us get a quick understanding of how our applicants fared in comparison to all other test takers. The graphic below (and on the lower left) provides a quick overview of the Stanine groups and their percentile ranges.'
+    st.image('stanine.png')
     'Since many applicants entering Kindergarten did not meet the lower age limit for age-based comparisons, we will have to rely on grade-level comparison scores. We just have to keep in mind that applicants were essentially testing "up" a grade level.'
-    st.write('Here are the total number of applications per top-choice school by grade')
+    st.write('The table below shows the total number of applications per top-choice school by grade')
     app_count = pd.pivot_table(cogat, index='Class Grade', columns='top-choice school', aggfunc='size', fill_value=0)
     app_count
 
 option = st.sidebar.selectbox(
-    'What grade level would you like to view?',
-     cogat['Class Grade'].unique())
-
+  'What grade level would you like to view?',
+  cogat['Class Grade'].unique())
 
 grade = cogat.loc[cogat['Class Grade'] == option]
 
-b_cut = st.sidebar.slider('Set lowest accepted value for Bates acceptance', min_value=1, max_value=75, step=1)
-b_wcut = st.sidebar.slider('Set lowest accepted value for Bates School Review', min_value=1, max_value=75, step=1)
-cut = st.sidebar.slider('Set lowest accepted value for acceptance', min_value=1, max_value=75, step=1)
-wcut = st.sidebar.slider('Set lowest accepted value for School Review', min_value=1, max_value=75, step=1)
+b_cut = st.sidebar.slider('Set lowest accepted value for Bates acceptance', min_value=1, max_value=75, step=1, value=23)
+b_wcut = st.sidebar.slider('Set lowest accepted value for Bates School Review', min_value=1, max_value=75, step=1, value=11)
+cut = st.sidebar.slider('Set lowest accepted value for acceptance', min_value=1, max_value=75, step=1, value=11)
+wcut = st.sidebar.slider('Set lowest accepted value for School Review', min_value=1, max_value=75, step=1, value=4)
 
 
 ############# Calculations
+
+grade.loc[(grade['Composite Grade Percentile'] >= b_wcut) & (grade['top-choice school'] == 'Bates Academy'), 'Decision'] = 'School Review'
+grade.loc[(grade['Composite Grade Percentile'] >= b_cut) & (grade['top-choice school'] == 'Bates Academy'), 'Decision'] = 'Accept'
+grade.loc[(grade['Composite Grade Percentile'] >= wcut) & (grade['top-choice school'] != 'Bates Academy'), 'Decision'] = 'School Review'
+grade.loc[(grade['Composite Grade Percentile'] >= cut) & (grade['top-choice school'] != 'Bates Academy'), 'Decision'] = 'Accept'
+
+results = pd.pivot_table(grade, columns='Decision', index=['School ID', 'top-choice school'], aggfunc='size', fill_value=0)
+results.reset_index(inplace=True)
+results = results.rename(columns = {'top-choice school': 'School'})
+capacity = pd.read_csv('capacity.csv')
+results = pd.merge(results, capacity[['School ID', str(option)]], on='School ID', how='left')
+results = results.rename(columns= {str(option): 'Capacity'})
+
+if st.sidebar.checkbox('Show Placement Results'):
+  with outputs:
+    st.title('Placement results based on cut scores')
+    results
 
 if st.sidebar.checkbox('Show Stanine Performance Groups'):
   with stanine:
@@ -220,25 +242,8 @@ if st.sidebar.checkbox('Show Stanine Performance Groups'):
     )
     st.altair_chart(test, use_container_width=True)
 
-grade.loc[(grade['Composite Grade Percentile'] >= b_wcut) & (grade['top-choice school'] == 'Bates Academy'), 'Decision'] = 'School Review'
-grade.loc[(grade['Composite Grade Percentile'] >= b_cut) & (grade['top-choice school'] == 'Bates Academy'), 'Decision'] = 'Accept'
-grade.loc[(grade['Composite Grade Percentile'] >= wcut) & (grade['top-choice school'] != 'Bates Academy'), 'Decision'] = 'School Review'
-grade.loc[(grade['Composite Grade Percentile'] >= cut) & (grade['top-choice school'] != 'Bates Academy'), 'Decision'] = 'Accept'
-
-results = pd.pivot_table(grade, columns='Decision', index='top-choice school', aggfunc='size', fill_value=0)
-results.reset_index(inplace=True)
-results = results.rename(columns = {'top-choice school': 'School'})
-capacity = pd.read_csv('capacity.csv')
-#results = pd.merge(results, capacity[['School', str(option)]], how='left')
-
 if st.sidebar.checkbox('Show Raw Data'):
   grade
-
-if st.sidebar.checkbox('Show Placement Results'):
-  with outputs:
-    st.title('Placement results based on cut scores')
-    results
-    capacity
 
 st.sidebar.image('stanine.png')
 
