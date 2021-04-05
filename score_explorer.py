@@ -9,8 +9,8 @@ import altair as alt
 ############ Data Import
 cogat = pd.read_csv('trimmed.csv')
 cogat['Composite Grade Percentile'] = np.where(cogat['Class Grade'] < 3,
-                                                     cogat['Grade Percentile Rank (GPR) VQ'],
-                                                     cogat['Grade Percentile Rank (GPR) VQN'])
+                                               cogat['Grade Percentile Rank (GPR) VQ'],
+                                               cogat['Grade Percentile Rank (GPR) VQN'])
 cogat['Decision'] = 'Decline'
 
 
@@ -22,10 +22,6 @@ overview = st.beta_container()
 stanine = st.beta_container()
 
 stanine1, stanine2, stanine3 = st.beta_columns(3)
-
-pctl = st.beta_container()
-
-pctl1, pctl2, pctl3 = st.beta_columns(3)
 
 outputs = st.beta_container()
 
@@ -51,8 +47,10 @@ option = st.sidebar.selectbox(
 
 grade = cogat.loc[cogat['Class Grade'] == option]
 
+b_cut = st.sidebar.slider('Set lowest accepted value for Bates acceptance', min_value=1, max_value=75, step=1)
+b_wcut = st.sidebar.slider('Set lowest accepted value for Bates School Review', min_value=1, max_value=75, step=1)
 cut = st.sidebar.slider('Set lowest accepted value for acceptance', min_value=1, max_value=75, step=1)
-wcut = st.sidebar.slider('Set lowest accepted value for waitlist', min_value=1, max_value=75, step=1)
+wcut = st.sidebar.slider('Set lowest accepted value for School Review', min_value=1, max_value=75, step=1)
 
 
 ############# Calculations
@@ -216,13 +214,16 @@ if st.sidebar.checkbox('Show Stanine Performance Groups'):
     )
     st.altair_chart(test, use_container_width=True)
 
-grade.loc[grade['Composite Grade Percentile'] >= wcut, 'Decision'] = 'Waitlist'
-grade.loc[grade['Composite Grade Percentile'] >= cut, 'Decision'] = 'Accept'
-
+grade.loc[(grade['Composite Grade Percentile'] >= b_wcut) & (grade['top-choice school'] == 'Bates Academy'), 'Decision'] = 'School Review'
+grade.loc[(grade['Composite Grade Percentile'] >= b_cut) & (grade['top-choice school'] == 'Bates Academy'), 'Decision'] = 'Accept'
+grade.loc[(grade['Composite Grade Percentile'] >= wcut) & (grade['top-choice school'] != 'Bates Academy'), 'Decision'] = 'School Review'
+grade.loc[(grade['Composite Grade Percentile'] >= cut) & (grade['top-choice school'] != 'Bates Academy'), 'Decision'] = 'Accept'
 
 results = pd.pivot_table(grade, columns='Decision', index='top-choice school', aggfunc='size', fill_value=0)
-
-
+results.reset_index(inplace=True)
+results = results.rename(columns = {'top-choice school': 'School'})
+capacity = pd.read_csv('capacity.csv')
+#results = pd.merge(results, capacity[['School', str(option)]], how='left')
 
 if st.sidebar.checkbox('Show Raw Data'):
   grade
@@ -231,5 +232,15 @@ if st.sidebar.checkbox('Show Placement Results'):
   with outputs:
     st.title('Placement results based on cut scores')
     results
+    capacity
 
 st.sidebar.image('http://www.readingstats.com/graphics/staninepicture.gif')
+
+# Different Cut Scores for each school two sets, Bates and Chrysler and FLICS
+# Grade level availability plays a role in the older grade levels
+# Kindergarten comparison of Grade to Age rankings
+
+#k_compare = cogat.loc[cogat['Age Stanine (AS) VN'].notnull()]
+#k_compare['Grade/Age Difference'] = k_compare['Age Stanine (AS) VN'] -  k_compare['Grade Stanine (GS) VN']
+#k_compare = k_compare['Grade/Age Difference'].value_counts()
+#st.bar_chart(k_compare)
