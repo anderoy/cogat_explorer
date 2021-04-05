@@ -234,7 +234,7 @@ if st.sidebar.checkbox('Show Placement Results'):
     results
     capacity
 
-st.sidebar.image('http://www.readingstats.com/graphics/staninepicture.gif')
+st.sidebar.image('stanine.png')
 
 # Different Cut Scores for each school two sets, Bates and Chrysler and FLICS
 # Grade level availability plays a role in the older grade levels
